@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Atlas profesional de Allan Umaña Ortiz. Ingeniería hidráulica, infraestructura internacional, geoinformación y transformación digital." />
+  <meta name="theme-color" content="#08111d" />
+  <title>Allan Umaña · Atlas Profesional 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>window.CESIUM_BASE_URL='https://cdn.jsdelivr.net/npm/cesium@1.134/Build/Cesium/';</script>
+  <link href="https://cdn.jsdelivr.net/npm/cesium@1.134/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <link href="assets/styles.css" rel="stylesheet" />
+  <script defer src="https://cdn.jsdelivr.net/npm/cesium@1.134/Build/Cesium/Cesium.js"></script>
+  <script defer src="js/config.js"></script>
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/globe.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <header class="nav" id="top">
+    <a href="#inicio" class="brand" aria-label="Inicio">
+      <span class="brand-mark">AU<span class="brand-dot">·</span></span>
+      <span><strong>ALLAN UMAÑA</strong><small>ENGINEERING <i>×</i> TECHNOLOGY</small></span>
+    </a>
+    <nav class="nav-links" aria-label="Navegación">
+      <a href="#inicio" data-i18n="navHome">Inicio</a>
+      <a href="#atlas" data-i18n="navAtlas">Atlas 3D</a>
+      <a href="#trayectoria" data-i18n="navCareer">Trayectoria</a>
+      <a href="#proyectos" data-i18n="navProjects">Proyectos</a>
+      <a href="#capacidades" data-i18n="navSkills">Capacidades</a>
+    </nav>
+    <div class="nav-actions"><div class="lang-switch" aria-label="Idioma"><button data-lang="es" class="active">ES</button><button data-lang="en">EN</button><button data-lang="it">IT</button></div><a class="outline-btn nav-contact" href="mailto:allanuo@gmail.com" data-i18n="contact">Contacto ↗</a></div>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="hero-glow"></div>
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="pulse"></span><span data-i18n="eyebrow">ATLAS PROFESIONAL · EDICIÓN 2026</span></div>
+          <h1 data-i18n-html="heroHeading">La ingeniería deja <em>huellas</em> en el territorio.</h1>
+          <p data-i18n="heroText">Explora mi trayectoria a través de proyectos de infraestructura, agua potable, análisis geoespacial y tecnología, en Costa Rica y el mundo.</p>
+          <div class="hero-buttons"><a class="primary-btn" href="#atlas"><span data-i18n="exploreMap">Explorar el globo</span> <span aria-hidden="true">↘</span></a><a class="ghost-btn" href="assets/CV_Allan_Umana_2026.pdf" download><span data-i18n="downloadCv">Descargar CV</span> ↗</a></div>
+        </div>
+        <div class="hero-aside"><div class="stat"><strong id="heroProjects">51</strong><span data-i18n="projectsLabel">Proyectos e iniciativas</span></div><div class="stat"><strong>04</strong><span data-i18n="countriesLabel">Países</span></div><div class="stat"><strong>12+</strong><span data-i18n="yearsLabel">Años de experiencia</span></div></div>
+      </div>
+      <div class="hero-foot"><span>CR · CL · BR · EC</span><span data-i18n="scrollPrompt">DESLIZA PARA EXPLORAR ↓</span></div>
+    </section>
+
+    <section class="atlas-section" id="atlas">
+      <div class="section-heading"><div><div class="kicker" data-i18n="atlasKicker">EXPLORACIÓN GEOGRÁFICA</div><h2 data-i18n="atlasTitle">Un mundo de proyectos.</h2><p data-i18n="atlasDescription">Elige un punto en el globo o utiliza el explorador para descubrir cada experiencia.</p></div><div class="heading-chips"><span class="chip"><b id="allCount">57</b> <span data-i18n="locationsLabel">ubicaciones</span></span><span class="chip"><span class="live-indicator"></span> CESIUM 3D</span></div></div>
+      <div class="atlas-shell" id="atlasShell">
+        <div id="cesiumContainer" role="application" aria-label="Globo geográfico interactivo de proyectos"></div>
+        <div class="globe-shade"></div>
+        <div class="globe-topline"><span><span class="live-indicator"></span> <span data-i18n="globeMode">GLOBO INTERACTIVO · VISTA SATELITAL</span></span><span id="mapStatus">● <span data-i18n="initializing">Iniciando visualizador…</span></span></div>
+        <div class="map-toolbar"><div class="layer-toggle"><button data-layer="satellite" class="active" data-i18n="satellite">Satélite</button><button data-layer="streets" data-i18n="streets">Calles</button></div><div class="map-tool-buttons"><button id="btnWorld" title="Vista mundial" aria-label="Vista mundial">◎ <span data-i18n="world">Mundo</span></button><button id="btnCostaRica" title="Costa Rica" aria-label="Enfocar Costa Rica">◉ <span>Costa Rica</span></button><button id="btnTour" title="Recorrido" aria-label="Recorrido guiado">▶ <span data-i18n="tour">Recorrido</span></button><button id="btnFullscreen" title="Pantalla completa" aria-label="Pantalla completa">⛶</button></div></div>
+        <div class="atlas-explorer glass-panel" id="explorerPanel">
+          <div class="explorer-title"><div><small data-i18n="explorer">EXPLORADOR</small><strong><span data-i18n="findProject">Encuentra un proyecto</span></strong></div><span class="index-count" id="visibleCount">00 / 57</span></div>
+          <label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Proyecto, ciudad, empresa…" autocomplete="off" aria-label="Buscar proyectos" /></label>
+          <div class="filter-grid"><label><span data-i18n="country">País</span><select id="filterCountry"></select></label><label><span data-i18n="kind">Tipo</span><select id="filterType"></select></label><label><span data-i18n="year">Desde el año</span><select id="filterYear"></select></label><label><span data-i18n="tech">Tecnología</span><select id="filterTech"></select></label><label><span data-i18n="evidenceFilter">Evidencia</span><select id="filterEvidence"></select></label></div>
+          <div class="filters-bottom"><label class="switch-row"><input id="toggleLabels" type="checkbox" checked /><span data-i18n="showLabels">Mostrar etiquetas</span></label><button class="text-btn" id="clearFilters" data-i18n="reset">Restablecer ↺</button></div>
+          <div class="explorer-list" id="explorerList"></div>
+          <div class="explorer-bottom"><span data-i18n="referenceWarning">Ubicaciones aproximadas cuando no existe coordenada verificada.</span></div>
+        </div>
+        <div class="details glass-panel" id="detailsPanel">
+          <div class="details-title"><span data-i18n="selectedPoint">PUNTO SELECCIONADO</span><button id="closeDetail" title="Cerrar detalle" aria-label="Cerrar detalle">×</button></div>
+          <div id="detailContent" class="details-content"><div class="empty-detail"><div class="empty-orbit">◎</div><strong data-i18n="selectProject">Selecciona un proyecto</strong><p data-i18n="selectProjectHint">Haz clic en un marcador o en la lista para iniciar un vuelo hacia el lugar.</p></div></div>
+        </div>
+        <div class="zoom-controls"><button id="zoomIn" title="Acercar" aria-label="Acercar">+</button><button id="zoomOut" title="Alejar" aria-label="Alejar">−</button><button id="resetNorth" title="Orientar norte" aria-label="Orientar norte">N ↑</button></div>
+        <div class="map-bottom"><span id="coordinateReadout">LAT —° / LON —° · ALT —</span><span class="map-tip" data-i18n="mapTip">Arrastra para rotar · rueda para zoom · Ctrl + arrastrar para inclinar</span></div>
+        <div class="globe-error" id="globeError" hidden><div class="error-icon">◌</div><h3 data-i18n="mapLoadError">No se pudo inicializar el globo</h3><p data-i18n="mapErrorHelp">Comprueba tu conexión a Internet y que la aceleración de hardware esté activada en Chrome o Edge. El resto del portafolio sigue disponible.</p></div>
+        <button class="mobile-explorer-button" id="openExplorer" data-i18n="viewProjects">☷ Ver proyectos</button>
+      </div>
+      <div class="atlas-legend"><div><span class="legend-dot water"></span><span data-i18n="waterInfra">Infraestructura y agua</span></div><div><span class="legend-dot digital"></span><span data-i18n="digital">Digital y análisis</span></div><div><span class="legend-dot company"></span><span data-i18n="companies">Empresas y docencia</span></div><div class="legend-disclaimer" data-i18n="legendDisclaimer">Los marcadores pueden representar una zona o un conjunto de obras, no necesariamente el sitio exacto.</div></div>
+    </section>
+
+    <section class="story-section" id="trayectoria"><div class="section-heading"><div><div class="kicker" data-i18n="careerKicker">TRAYECTORIA</div><h2 data-i18n="careerTitle">Ingeniería, liderazgo e innovación.</h2></div><p data-i18n="careerText">Una carrera que combina diseño, operación de infraestructura, dirección técnica y herramientas digitales.</p></div><div class="timeline"><div class="timeline-row"><span class="time-date">2023 — <span data-i18n="present">Hoy</span></span><div><h3 data-i18n="job1">Director · Mejoramiento de Sistemas GAM</h3><p>AyA · Costa Rica</p></div><span class="time-type" data-i18n="leadership">LIDERAZGO</span></div><div class="timeline-row"><span class="time-date">2016 — 2023</span><div><h3 data-i18n="job2">Especialista e ingeniero ejecutivo</h3><p>AyA · Costa Rica</p></div><span class="time-type" data-i18n="engineering">INGENIERÍA</span></div><div class="timeline-row"><span class="time-date">2018 — <span data-i18n="present">Hoy</span></span><div><h3 data-i18n="job3">Profesor de hidráulica</h3><p>Universidad Latina · Costa Rica</p></div><span class="time-type" data-i18n="teaching">DOCENCIA</span></div><div class="timeline-row"><span class="time-date">2013 — 2016</span><div><h3 data-i18n="job4">Ingeniería de diseño y consultoría</h3><p>Santos CMI · Proyectos en América Latina</p></div><span class="time-type" data-i18n="international">INTERNACIONAL</span></div></div></section>
+
+    <section class="project-section" id="proyectos"><div class="section-heading"><div><div class="kicker" data-i18n="projectKicker">PROYECTOS SELECCIONADOS</div><h2 data-i18n="projectTitle">Del territorio a los resultados.</h2></div><p data-i18n="projectIntro">Una selección de experiencias que puedes explorar directamente sobre el globo.</p></div><div class="project-cards" id="featuredProjects"></div><button class="wide-link" id="allProjectsBtn" data-i18n="allProjects">Explorar todos los proyectos en el atlas ↗</button></section>
+
+    <section class="skills-section" id="capacidades"><div class="section-heading"><div><div class="kicker" data-i18n="skillsKicker">COMPETENCIAS</div><h2 data-i18n="skillsTitle">Ingeniería conectada con datos.</h2></div></div><div class="skill-grid"><article><span>01 /</span><h3 data-i18n="skillA">Ingeniería hidráulica</h3><p>WaterGEMS · HEC-RAS · Civil 3D · Redes · ANC</p></article><article><span>02 /</span><h3 data-i18n="skillB">Geoespacial y GIS</h3><p>ArcGIS Enterprise · ArcGIS Pro · Geodatabases</p></article><article><span>03 /</span><h3 data-i18n="skillC">Desarrollo y automatización</h3><p>Python · SQL · Streamlit · HTML · JavaScript · Supabase</p></article><article><span>04 /</span><h3 data-i18n="skillD">Dirección y análisis</h3><p>Power BI · SCADA · Power Automate · Gestión de proyectos</p></article></div><div class="languages-strip"><strong data-i18n="languages">IDIOMAS</strong><span>Español <small data-i18n="native">Nativo</small></span><span>English <small>C1</small></span><span>Italiano <small>B1–B2</small></span></div></section>
+  </main>
+  <footer class="footer"><div><strong>ALLAN UMAÑA ORTIZ</strong><span>Engineering × Technology · Costa Rica</span></div><div><a href="mailto:allanuo@gmail.com">Email ↗</a><a href="https://www.linkedin.com/in/allan-uma%C3%B1a-ortiz-586577122/" target="_blank" rel="noopener">LinkedIn ↗</a><a href="assets/CV_Allan_Umana_2026.pdf" download>CV PDF ↗</a></div><span class="footer-year">© 2026</span></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
