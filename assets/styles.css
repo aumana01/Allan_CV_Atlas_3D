@@ -18,21 +18,22 @@
 @media(max-width:800px){.time-navigator{padding:14px 15px}.time-navigation-top{align-items:stretch;flex-direction:column;gap:11px}.time-navigation-controls{gap:7px}.time-mode-select{flex:1;justify-content:center}.time-value span{text-align:right}.timeline-ticks button{font-size:9px;padding:3px 2px}.timeline-ticks button:nth-child(even){display:none}}
 @media(max-width:430px){.time-navigation-controls{justify-content:space-between}.time-navigation-controls button{padding:7px}.time-mode-select{order:3;flex-basis:100%;justify-content:flex-start}.time-mode-select select{flex:1;max-width:none}.timeline-ticks button:nth-child(3n){display:none}}
 
-/* Información de contacto y ubicación — no se publica una coordenada residencial. */
-.contact-section{max-width:1700px;margin:auto;padding:74px 4.5% 0;scroll-margin-top:90px}
-.contact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.contact-card{min-width:0;display:flex;align-items:flex-start;gap:16px;padding:25px 23px;border-radius:15px;border:1px solid var(--line);background:linear-gradient(140deg,#112b3c,#0a1c2b);transition:transform .2s,border-color .2s,background .2s}
+
+/* Diseño de contacto: tarjetas accesibles, textos separados, adaptación móvil. */
+.contact-section{max-width:1700px;margin:auto;padding:74px 4.5% 42px;scroll-margin-top:90px}
+.contact-section .section-heading{margin-bottom:24px}
+.contact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.contact-card{min-width:0;display:flex;align-items:flex-start;gap:17px;padding:25px 24px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(135deg,#10293a,#0a1b29);min-height:138px;box-shadow:0 12px 32px rgba(0,0,0,.12);transition:transform .2s,border-color .2s}
 a.contact-card:hover{transform:translateY(-3px);border-color:var(--teal)}
-.contact-card>div{display:flex;flex-direction:column;gap:5px;min-width:0}
-.contact-icon{display:grid;place-items:center;width:42px;height:42px;flex-shrink:0;border:1px solid rgba(73,221,195,.3);border-radius:12px;color:var(--teal);background:rgba(73,221,195,.08);font:700 24px var(--display)}
-.contact-label{color:var(--teal);font:800 10px var(--display);letter-spacing:1.2px}
-.contact-card strong{font:700 clamp(14px,1.4vw,20px) var(--display);overflow-wrap:anywhere;color:#f0fafc}
-.contact-card small,.contact-map-link{color:#a6cbd4;font-size:12px}
-.contact-card small{margin-top:7px}.contact-address{font-size:12px;color:#b1c8d3}
-.contact-map-link{display:inline-flex;align-self:flex-start;margin-top:8px;text-decoration:underline;text-decoration-color:#5a9a9a;text-underline-offset:4px}
+.contact-copy{display:flex;flex-direction:column;gap:7px;min-width:0;align-items:flex-start}
+.contact-icon{display:grid;place-items:center;width:44px;height:44px;flex:0 0 44px;border:1px solid rgba(73,221,195,.3);border-radius:12px;color:var(--teal);background:rgba(73,221,195,.08);font:800 19px var(--display)}
+.contact-label{display:block;color:var(--teal);font:800 10px/1.4 var(--display);letter-spacing:1.25px}
+.contact-card strong{display:block;color:#f0fafc;font:700 clamp(15px,1.45vw,20px)/1.4 var(--display);overflow-wrap:anywhere}
+.contact-card small,.contact-map-link,.contact-address{display:block;font-size:12px;line-height:1.55}
+.contact-card small,.contact-map-link{margin-top:5px;color:#a6cbd4}
+.contact-address{color:#b1c8d3;font-size:13px}
+.contact-map-link{font-weight:700;text-decoration:underline;text-underline-offset:4px;text-decoration-color:#406f7b}
 .contact-map-link:hover{color:var(--teal)}
-.contact-linkedin{margin-top:17px;display:flex;gap:13px;align-items:center;flex-wrap:wrap;color:#9bbdc8;font-size:12px}
-.contact-linkedin>span:first-child{font:800 10px var(--display);letter-spacing:1px}.contact-linkedin>a{font-weight:800;color:var(--teal)}
-.contact-private{margin-left:auto;font-size:11px;color:#819eab}
-@media(max-width:850px){.contact-grid{grid-template-columns:1fr 1fr}.contact-location{grid-column:1/-1}.contact-private{margin-left:0;width:100%}}
-@media(max-width:520px){.contact-grid{grid-template-columns:1fr}.contact-location{grid-column:auto}.contact-card{padding:20px 18px}}
+.contact-private{margin:16px 0 0;color:#91b2bf;font-size:12px;line-height:1.7;max-width:800px}
+@media(max-width:860px){.contact-grid{grid-template-columns:1fr}.contact-card{min-height:unset}.contact-section{padding-top:58px}}
+@media(max-width:520px){.contact-card{padding:20px 16px;gap:12px}.contact-icon{width:40px;height:40px;flex-basis:40px;font-size:17px}}
