@@ -78,3 +78,7 @@ Para instalar la corrección, extrae el ZIP **en una carpeta nueva** (para no me
 - **No es una copia de Google Earth** ni utiliza imágenes 3D propietarias de Google.
 - Por privacidad, el sitio usa solo correo profesional y enlaces públicos; no publiques referencias personales ni coordenadas sensibles de sistemas de infraestructura sin autorización institucional.
 - Probado con chequeos de sintaxis y flujo sin conectividad exterior. Es necesario realizar prueba visual en un navegador con Internet y WebGL para confirmar disponibilidad de imágenes y la experiencia Cesium real.
+
+## Presentación y contacto (octubre de 2026)
+
+Se actualizó el titular principal a un mensaje discreto sobre un CV interactivo y se incorporó una sección de contacto accesible en español, inglés e italiano. Incluye correo, teléfono y localidad residencial general (Campo Real – CONCASA, San Rafael de Alajuela, Costa Rica). Por privacidad no se publica el número de apartamento ni una coordenada residencial precisa; el enlace geográfico apunta a la localidad. La navegación y el mapa 3D conservan su funcionamiento anterior.
