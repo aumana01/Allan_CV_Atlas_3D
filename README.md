@@ -1,6 +1,14 @@
-# Allan Umaña · Atlas Profesional 3D (corrección de renderizado)
+# Allan Umaña · Atlas Profesional 3D (mapa temporal)
 
 Sitio web estático (HTML + CSS + JavaScript + **CesiumJS**) con globo terrestre 3D, cartografía satelital, vista de calles, marcadores interactivos, fichas, recorrido guiado y traducción español / inglés / italiano.
+
+## Navegador temporal + Planta Ricura (octubre de 2026)
+
+Se incorporó una línea de tiempo **encima del mapa 3D**. Puedes pulsar un año, arrastrar el control deslizante o reproducir una animación anual (▶ / pausa). **Hasta ese año** muestra acumulativamente los proyectos iniciados hasta entonces y **Activos ese año** utiliza el intervalo entre `anio_inicio` y `anio_fin` de cada registro (sin fecha final = actividad vigente). **Todos los años** elimina el filtro temporal y restaura el conjunto completo. Los filtros por país, tipo, tecnología y evidencia siguen combinándose con la línea de tiempo. Al cambiar de idioma se traducen los controles temporales.
+
+El atlas tiene ahora **58 registros (52 proyectos y 6 empresas)**. Se añadió la **Planta Ricura Avícola de Walmart** (`SCH-RICURA-2015`), intervención principal durante la experiencia en **SCH Consultoría y Construcción (2015–2016)**, con remodelación de cuartos de refrigeración, mejoras estructurales y mantenimiento industrial. Coordenadas proporcionadas por el titular: `9.96193965069047, -84.35572079479125`. Se corrigió también la referencia **CSP, Pecém (Brasil)** a `-3.585917, -38.858932`, confirmada por el titular.
+
+El archivo `data/proyectos.xlsx` sigue siendo el maestro editable: para añadir proyectos basta modificar la hoja `Proyectos`, ejecutar `ACTUALIZAR_DESDE_EXCEL.bat` y publicar el JSON/Excel actualizado en GitHub.
 
 ## Corrección del error `setDynamicLighting` (v2.1)
 
@@ -66,7 +74,7 @@ Para instalar la corrección, extrae el ZIP **en una carpeta nueva** (para no me
 
 - El globo es **tridimensional** gracias al elipsoide WGS84 de CesiumJS. De manera predeterminada **no incluye elevaciones ni edificios 3D**. Opcionalmente, agrega un token público de Cesium ion con restricciones de dominio y permisos mínimos a `js/config.js` para activar **Cesium World Terrain**; configura `osmBuildings:true` si deseas mostrar edificios 3D (pueden generar consumo del servicio). La vista satelital sigue siendo imagen raster aplicada al globo.
 - Las imágenes satelitales predeterminadas se solicitan al servicio público de **Esri World Imagery**, con atribución en pantalla; la disponibilidad, uso público y límites dependen de sus condiciones de servicio. La alternativa OpenStreetMap tiene sus propias políticas de uso; para tráfico considerable configura un proveedor de mapas autorizado.
-- Se parte de 57 registros heredados (51 proyectos/iniciativas + 6 instituciones/empresas). La mayoría de coordenadas son **referencias aproximadas de municipio, región o ciudad**: verifica cada obra antes de presentarla públicamente como infraestructura localizada.
+- Se parte de 58 registros (52 proyectos/iniciativas + 6 instituciones/empresas). La mayoría de coordenadas son **referencias aproximadas de municipio, región o ciudad**: verifica cada obra antes de presentarla públicamente como infraestructura localizada.
 - **No es una copia de Google Earth** ni utiliza imágenes 3D propietarias de Google.
 - Por privacidad, el sitio usa solo correo profesional y enlaces públicos; no publiques referencias personales ni coordenadas sensibles de sistemas de infraestructura sin autorización institucional.
 - Probado con chequeos de sintaxis y flujo sin conectividad exterior. Es necesario realizar prueba visual en un navegador con Internet y WebGL para confirmar disponibilidad de imágenes y la experiencia Cesium real.

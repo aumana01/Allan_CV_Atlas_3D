@@ -44,22 +44,37 @@
           <p data-i18n="heroText">Explora mi trayectoria a través de proyectos de infraestructura, agua potable, análisis geoespacial y tecnología, en Costa Rica y el mundo.</p>
           <div class="hero-buttons"><a class="primary-btn" href="#atlas"><span data-i18n="exploreMap">Explorar el globo</span> <span aria-hidden="true">↘</span></a><a class="ghost-btn" href="assets/CV_Allan_Umana_2026.pdf" download><span data-i18n="downloadCv">Descargar CV</span> ↗</a></div>
         </div>
-        <div class="hero-aside"><div class="stat"><strong id="heroProjects">51</strong><span data-i18n="projectsLabel">Proyectos e iniciativas</span></div><div class="stat"><strong>04</strong><span data-i18n="countriesLabel">Países</span></div><div class="stat"><strong>12+</strong><span data-i18n="yearsLabel">Años de experiencia</span></div></div>
+        <div class="hero-aside"><div class="stat"><strong id="heroProjects">52</strong><span data-i18n="projectsLabel">Proyectos e iniciativas</span></div><div class="stat"><strong>04</strong><span data-i18n="countriesLabel">Países</span></div><div class="stat"><strong>12+</strong><span data-i18n="yearsLabel">Años de experiencia</span></div></div>
       </div>
       <div class="hero-foot"><span>CR · CL · BR · EC</span><span data-i18n="scrollPrompt">DESLIZA PARA EXPLORAR ↓</span></div>
     </section>
 
     <section class="atlas-section" id="atlas">
-      <div class="section-heading"><div><div class="kicker" data-i18n="atlasKicker">EXPLORACIÓN GEOGRÁFICA</div><h2 data-i18n="atlasTitle">Un mundo de proyectos.</h2><p data-i18n="atlasDescription">Elige un punto en el globo o utiliza el explorador para descubrir cada experiencia.</p></div><div class="heading-chips"><span class="chip"><b id="allCount">57</b> <span data-i18n="locationsLabel">ubicaciones</span></span><span class="chip"><span class="live-indicator"></span> CESIUM 3D</span></div></div>
+      <div class="section-heading"><div><div class="kicker" data-i18n="atlasKicker">EXPLORACIÓN GEOGRÁFICA</div><h2 data-i18n="atlasTitle">Un mundo de proyectos.</h2><p data-i18n="atlasDescription">Elige un punto en el globo o utiliza el explorador para descubrir cada experiencia.</p></div><div class="heading-chips"><span class="chip"><b id="allCount">58</b> <span data-i18n="locationsLabel">ubicaciones</span></span><span class="chip"><span class="live-indicator"></span> CESIUM 3D</span></div></div>
+      <div class="time-navigator" id="timeNavigator" aria-label="Navegador temporal del portafolio">
+        <div class="time-navigation-top">
+          <div class="time-navigation-label"><span class="time-navigator-icon">◷</span><div><strong data-i18n="timeTravel">VIAJE EN EL TIEMPO</strong><small data-i18n="timeHelp">Desliza para explorar los proyectos de cada año.</small></div></div>
+          <div class="time-navigation-controls">
+            <button id="timelineAll" class="time-all active" type="button" aria-pressed="true" data-i18n="timeAll">Todos los años</button>
+            <label class="time-mode-select"><span data-i18n="timeShow">Mostrar</span><select id="timelineMode" aria-label="Modo de filtrado temporal"><option value="upTo" data-i18n="timeAccumulated">Hasta ese año</option><option value="active" data-i18n="timeActive">Activos ese año</option></select></label>
+            <button id="timelinePlay" class="time-play" type="button" aria-label="Reproducir recorrido por años" title="Reproducir recorrido">▶ <span data-i18n="timePlay">Reproducir</span></button>
+          </div>
+        </div>
+        <div class="time-navigation-body">
+          <div class="time-value"><strong id="timelineYearLabel" aria-live="polite">2012 — 2026</strong><span id="timelineSummary" role="status" aria-live="polite">58 ubicaciones · todos los años</span></div>
+          <input id="timelineRange" class="timeline-range" type="range" min="2012" max="2026" step="1" value="2026" aria-label="Seleccionar año del mapa" />
+          <div class="timeline-ticks" id="timelineTicks" aria-label="Seleccionar año rápidamente"></div>
+        </div>
+      </div>
       <div class="atlas-shell" id="atlasShell">
         <div id="cesiumContainer" role="application" aria-label="Globo geográfico interactivo de proyectos"></div>
         <div class="globe-shade"></div>
         <div class="globe-topline"><span><span class="live-indicator"></span> <span data-i18n="globeMode">GLOBO INTERACTIVO · VISTA SATELITAL</span></span><span id="mapStatus">● <span data-i18n="initializing">Iniciando visualizador…</span></span></div>
         <div class="map-toolbar"><div class="layer-toggle"><button data-layer="satellite" class="active" data-i18n="satellite">Satélite</button><button data-layer="streets" data-i18n="streets">Calles</button></div><div class="map-tool-buttons"><button id="btnWorld" title="Vista mundial" aria-label="Vista mundial">◎ <span data-i18n="world">Mundo</span></button><button id="btnCostaRica" title="Costa Rica" aria-label="Enfocar Costa Rica">◉ <span>Costa Rica</span></button><button id="btnTour" title="Recorrido" aria-label="Recorrido guiado">▶ <span data-i18n="tour">Recorrido</span></button><button id="btnFullscreen" title="Pantalla completa" aria-label="Pantalla completa">⛶</button></div></div>
         <div class="atlas-explorer glass-panel" id="explorerPanel">
-          <div class="explorer-title"><div><small data-i18n="explorer">EXPLORADOR</small><strong><span data-i18n="findProject">Encuentra un proyecto</span></strong></div><span class="index-count" id="visibleCount">00 / 57</span></div>
+          <div class="explorer-title"><div><small data-i18n="explorer">EXPLORADOR</small><strong><span data-i18n="findProject">Encuentra un proyecto</span></strong></div><span class="index-count" id="visibleCount">00 / 58</span></div>
           <label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Proyecto, ciudad, empresa…" autocomplete="off" aria-label="Buscar proyectos" /></label>
-          <div class="filter-grid"><label><span data-i18n="country">País</span><select id="filterCountry"></select></label><label><span data-i18n="kind">Tipo</span><select id="filterType"></select></label><label><span data-i18n="year">Desde el año</span><select id="filterYear"></select></label><label><span data-i18n="tech">Tecnología</span><select id="filterTech"></select></label><label><span data-i18n="evidenceFilter">Evidencia</span><select id="filterEvidence"></select></label></div>
+          <div class="filter-grid"><label><span data-i18n="country">País</span><select id="filterCountry"></select></label><label><span data-i18n="kind">Tipo</span><select id="filterType"></select></label><label><span data-i18n="tech">Tecnología</span><select id="filterTech"></select></label><label><span data-i18n="evidenceFilter">Evidencia</span><select id="filterEvidence"></select></label></div>
           <div class="filters-bottom"><label class="switch-row"><input id="toggleLabels" type="checkbox" checked /><span data-i18n="showLabels">Mostrar etiquetas</span></label><button class="text-btn" id="clearFilters" data-i18n="reset">Restablecer ↺</button></div>
           <div class="explorer-list" id="explorerList"></div>
           <div class="explorer-bottom"><span data-i18n="referenceWarning">Ubicaciones aproximadas cuando no existe coordenada verificada.</span></div>

@@ -5,7 +5,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const safeUrl=s=>{try{const u=new URL(s);return ['https:','http:'].includes(u.protocol)?u.href:'';}catch(e){return '';}};
 const str=(s,lang)=>typeof s==='object'&&s ? (s[lang]||s.es||'') : (s||'');
 const normalize=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-const State={data:[],filtered:[],lang:'es',selected:null,globe:null,tour:false};
+const State={data:[],filtered:[],lang:'es',selected:null,globe:null,tour:false,timelineYear:null,timelineMode:'upTo',timelineMin:2012,timelineMax:2026,timelineTimer:null};
 const dict=()=>window.ATLAS_I18N[State.lang];const tr=key=>dict()[key]||window.ATLAS_I18N.es[key]||key;
 let toastTimer;
 function toast(message){const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);}
@@ -25,23 +25,77 @@ function paintFilters(){
  };
  choose('filterCountry',[...new Set(State.data.map(x=>x.pais))].sort(),tr('countryAll'));
  choose('filterType',['Proyecto','Empresa'],tr('typeAll'),v=>v==='Proyecto'?tr('projects'):tr('orgs'));
- choose('filterYear',[2010,2013,2016,2018,2020,2022,2024,2025,2026].map(String),tr('yearAll'));
  const allTech=new Set();State.data.forEach(p=>String(p.tecnologias||'').split(',').forEach(x=>{let s=x.trim();if(s)allTech.add(s);}));
  choose('filterTech',[...allTech].sort((a,b)=>a.localeCompare(b)),tr('techAll'));
  choose('filterEvidence',[...new Set(State.data.map(x=>x.evidencia).filter(Boolean))].sort(),tr('evidenceAll'));
 }
+function stopTimeline(){
+ if(State.timelineTimer!==null){clearInterval(State.timelineTimer);State.timelineTimer=null;}
+}
+function setTimelineYear(year,{stop=true}={}){
+ if(stop)stopTimeline();
+ State.timelineYear=year===null?null:Math.max(State.timelineMin,Math.min(State.timelineMax,Math.round(Number(year))));
+ if(State.selected&&State.timelineYear!==null){
+  const p=State.data.find(x=>String(x.id)===State.selected);
+  if(p){const y=State.timelineYear,start=Number(p.anio_inicio),end=p.anio_fin==null?State.timelineMax:Number(p.anio_fin);
+   if(State.timelineMode==='active'?!(start<=y&&y<=end):start>y){State.selected=null;renderDetails();}}
+ }
+ filtersChanged();
+}
+function syncTimelineUI(){
+ if(!$('timelineRange'))return;
+ const year=State.timelineYear;
+ $('timelineRange').min=String(State.timelineMin);
+ $('timelineRange').max=String(State.timelineMax);
+ $('timelineRange').value=String(year??State.timelineMax);
+ const progress=year===null?100:100*(year-State.timelineMin)/Math.max(1,State.timelineMax-State.timelineMin);
+ $('timelineRange').style.setProperty('--time-progress',`${progress}%`);
+ $('timelineAll').classList.toggle('active',year===null);
+ $('timelineAll').setAttribute('aria-pressed',String(year===null));
+ $('timelineYearLabel').textContent=year===null?`${State.timelineMin} — ${State.timelineMax}`:String(year);
+ $('timelineSummary').textContent=`${State.filtered.length} ${tr('timeLocations')} · ${year===null?tr('timeAllYears'):(State.timelineMode==='active'?tr('timeActiveSummary'):tr('timeUpToSummary'))}`;
+ $('timelineMode').value=State.timelineMode;
+ $('timelinePlay').classList.toggle('playing',State.timelineTimer!==null);
+ $('timelinePlay').innerHTML=State.timelineTimer!==null?`Ⅱ <span>${esc(tr('timePause'))}</span>`:`▶ <span>${esc(tr('timePlay'))}</span>`;
+ document.querySelectorAll('[data-time-year]').forEach(el=>{const n=Number(el.dataset.timeYear);el.classList.toggle('active',year===n);el.setAttribute('aria-current',year===n?'date':'false');});
+}
+function initTimeline(){
+ const years=State.data.map(x=>Number(x.anio_inicio)).filter(Number.isFinite);
+ State.timelineMin=Math.min(...years);
+ State.timelineMax=Math.max(new Date().getFullYear(),...years);
+ const begin=State.timelineMin,finish=State.timelineMax;
+ const candidates=new Set([begin,finish]);
+ for(let yr=begin;yr<=finish;yr++){if(yr%2===0)candidates.add(yr);}
+ $('timelineTicks').innerHTML=[...candidates].sort((a,b)=>a-b).map(year=>`<button type="button" data-time-year="${year}" aria-label="${year}">${year}</button>`).join('');
+ $('timelineTicks').addEventListener('click',event=>{const target=event.target.closest('[data-time-year]');if(target)setTimelineYear(Number(target.dataset.timeYear));});
+ $('timelineRange').addEventListener('input',event=>setTimelineYear(Number(event.target.value)));
+ $('timelineAll').addEventListener('click',()=>setTimelineYear(null));
+ $('timelineMode').addEventListener('change',event=>{State.timelineMode=event.target.value;stopTimeline();filtersChanged();});
+ $('timelinePlay').addEventListener('click',()=>{
+  if(State.timelineTimer!==null){stopTimeline();syncTimelineUI();return;}
+  const start=State.timelineYear===null||State.timelineYear>=State.timelineMax?State.timelineMin:State.timelineYear;
+  setTimelineYear(start,{stop:false});
+  State.timelineTimer=setInterval(()=>{
+   if(State.timelineYear>=State.timelineMax){stopTimeline();syncTimelineUI();return;}
+   setTimelineYear(State.timelineYear+1,{stop:false});
+  },1150);
+  syncTimelineUI();
+ });
+ syncTimelineUI();
+}
 function filtersChanged(){
- const country=$('filterCountry').value,type=$('filterType').value,year=Number($('filterYear').value)||0,tech=$('filterTech').value,evidence=$('filterEvidence').value,query=normalize($('search').value.trim());
+ const country=$('filterCountry').value,type=$('filterType').value,tech=$('filterTech').value,evidence=$('filterEvidence').value,query=normalize($('search').value.trim());
  State.filtered=State.data.filter(p=>{
   if(country&&p.pais!==country)return false;
   if(type&&p.tipo!==type)return false;
-  if(year&&(!p.anio_inicio||Number(p.anio_inicio)<year))return false;
+  if(State.timelineYear!==null){const start=Number(p.anio_inicio);const end=p.anio_fin==null?State.timelineMax:Number(p.anio_fin);if(!Number.isFinite(start))return false;if(State.timelineMode==='active'?!(start<=State.timelineYear&&State.timelineYear<=end):start>State.timelineYear)return false;}
   if(tech&&!String(p.tecnologias||'').split(',').map(s=>s.trim()).includes(tech))return false;
   if(evidence&&p.evidencia!==evidence)return false;
   if(query){const haystack=normalize([str(p.nombre,State.lang),str(p.nombre,'es'),p.ciudad,p.region,p.organizacion,p.pais,p.tecnologias,p.categoria,p.participacion_detalle,str(p.descripcion,State.lang)].join(' '));if(!haystack.includes(query))return false;}
   return true;
  });
  $('visibleCount').textContent=`${String(State.filtered.length).padStart(2,'0')} / ${State.data.length}`;
+ syncTimelineUI();
  renderList();if(State.globe)State.globe.setItems(State.filtered,State.lang,$('toggleLabels').checked);
 }
 function renderList(){
@@ -88,21 +142,21 @@ function selectProject(id, fly=true){
  if(listButton)listButton.scrollIntoView({block:'nearest',behavior:'smooth'});
 }
 function renderFeatured(){
- const ids=['8','9','10','7','15','16'];
+ const ids=['8','9','10','7','15','16','SCH-RICURA-2015'];
  const selected=ids.map(id=>State.data.find(x=>String(x.id)===id)).filter(Boolean);
  $('featuredProjects').innerHTML=selected.map(p=>{
   const desc=str(p.descripcion,State.lang);
   return `<button class="project-card" data-featured-id="${esc(p.id)}"><span class="pc-tag">${esc(p.pais.toUpperCase())} / ${esc(p.anio_inicio||'')}</span><h3>${esc(str(p.nombre,State.lang))}</h3><p>${esc(desc.length>135?desc.slice(0,132)+'…':desc)}</p><div class="pc-foot">${esc(tr('viewInAtlas'))} &nbsp;→</div></button>`;
  }).join('');
 }
-function setLanguage(lang){if(!window.ATLAS_I18N[lang])return;State.lang=lang;translateUI();paintFilters();filtersChanged();renderDetails();renderFeatured();}
+function setLanguage(lang){if(!window.ATLAS_I18N[lang])return;State.lang=lang;translateUI();paintFilters();filtersChanged();renderDetails();renderFeatured();syncTimelineUI();}
 function bind(){
  document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setLanguage(b.dataset.lang)));
- for(const id of ['filterCountry','filterType','filterYear','filterTech','filterEvidence','search'])$(id).addEventListener(id==='search'?'input':'change',filtersChanged);
+ for(const id of ['filterCountry','filterType','filterTech','filterEvidence','search'])$(id).addEventListener(id==='search'?'input':'change',filtersChanged);
  $('toggleLabels').addEventListener('change',()=>State.globe?.setLabels($('toggleLabels').checked));
- $('clearFilters').addEventListener('click',()=>{for(const id of ['filterCountry','filterType','filterYear','filterTech','filterEvidence','search'])$(id).value='';filtersChanged();});
+ $('clearFilters').addEventListener('click',()=>{for(const id of ['filterCountry','filterType','filterTech','filterEvidence','search'])$(id).value='';setTimelineYear(null);});
  $('explorerList').addEventListener('click',e=>{const b=e.target.closest('[data-project-id]');if(b)selectProject(b.dataset.projectId);});
- $('featuredProjects').addEventListener('click',e=>{const b=e.target.closest('[data-featured-id]');if(!b)return;const p=State.data.find(x=>String(x.id)===b.dataset.featuredId);if(!p)return;document.getElementById('atlas').scrollIntoView({behavior:'smooth'});setTimeout(()=>selectProject(p.id),450);});
+ $('featuredProjects').addEventListener('click',e=>{const b=e.target.closest('[data-featured-id]');if(!b)return;const p=State.data.find(x=>String(x.id)===b.dataset.featuredId);if(!p)return;setTimelineYear(null);document.getElementById('atlas').scrollIntoView({behavior:'smooth'});setTimeout(()=>selectProject(p.id),450);});
  $('allProjectsBtn').addEventListener('click',()=>{document.getElementById('atlas').scrollIntoView({behavior:'smooth'});if(window.innerWidth<=800)$('explorerPanel').classList.add('open');});
  $('closeDetail').addEventListener('click',()=>{State.selected=null;renderDetails();renderList();});
  $('openExplorer').addEventListener('click',()=>{$('explorerPanel').classList.toggle('open');$('detailsPanel').classList.remove('open');});
@@ -129,7 +183,7 @@ async function launch(){
   State.data=obj.items.filter(p=>['yes','si','sí','true','1'].includes(String(p.visible||'yes').toLowerCase()) && Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lon)));
   $('allCount').textContent=State.data.length;
   $('heroProjects').textContent=State.data.filter(isProject).length;
-  paintFilters();filtersChanged();renderFeatured();renderDetails();
+  initTimeline();paintFilters();filtersChanged();renderFeatured();renderDetails();
   if(!window.Cesium)throw new Error(tr('globeUnavailable'));
   State.globe=new window.AtlasGlobe($('cesiumContainer'),id=>selectProject(id));
   State.globe.onMove=c=>{$('coordinateReadout').textContent=`LAT ${c.lat}° / LON ${c.lon}° · ALT ${c.alt}`;};

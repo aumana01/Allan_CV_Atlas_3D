@@ -1,7 +1,7 @@
 {
   "generated": "2026-10-08",
   "language_source": "es",
-  "count": 57,
+  "count": 58,
   "items": [
     {
       "id": "1",
@@ -661,20 +661,20 @@
       "estado": "Participación",
       "tecnologias": "Hydrology",
       "indicador": "Potencia por confirmar",
-      "precision": "Referencia de instalación pública",
+      "precision": "Coordenada de referencia confirmada por el titular",
       "visible": "yes",
       "fuente": "CV 2025",
       "url_fuente": "https://www.wikidata.org/wiki/Q18477912",
-      "url_google_maps": "https://www.google.com/maps/search/?api=1&query=Complejo%20sider%C3%BArgico%20CSP%20%E2%80%93%20Brasil%2C%20S%C3%A3o%20Gon%C3%A7alo%20do%20Amarante%2C%20Brasil",
+      "url_google_maps": "https://www.google.com/maps/search/?api=1&query=-3.585917%2C-38.858932",
       "imagen_url": "",
       "ambito": "Puntual",
       "evidencia": "Según CV",
       "participacion_detalle": "Participación en diseño de obras civiles y drenaje",
-      "nota_geografica": "Revisar: la coordenada suministrada (-22.51394179581262, -44.11538570542573) no corresponde a Pecém/Ceará. Se conserva la ubicación anterior de referencia.",
+      "nota_geografica": "Planta siderúrgica CSP, Pecém, Ceará. Coordenada validada por el titular; representa una ubicación de referencia de la instalación.",
       "fuentes_internas": "CV 2024/2025/2026",
-      "validacion": "PENDIENTE: coordenada suministrada incompatible con Pecém (Ceará). Mantener punto anterior hasta confirmar.",
-      "lat": -3.58535,
-      "lon": -38.85508,
+      "validacion": "Confirmación del titular, octubre 2026",
+      "lat": -3.585917,
+      "lon": -38.858932,
       "nombre": {
         "es": "Complejo siderúrgico CSP – Brasil",
         "en": "CSP Steel Plant – Brazil",
@@ -997,8 +997,7 @@
       "tipo": "Proyecto",
       "organizacion": "AyA",
       "pais": "Costa Rica",
-      "region": "Puntarenas",
-      "ciudad": "Ciudad Cortés",
+      "region": "Puntarenas",      "ciudad": "Ciudad Cortés",
       "anio_inicio": 2022,
       "anio_fin": null,
       "categoria": "Planificación, costos y seguimiento de proyecto",
@@ -1997,8 +1996,7 @@
       "precision": "Multisitio / zona",
       "visible": "yes",
       "fuente": "Trayectoria 2017–2026 (archivo aportado)",
-      "url_fuente": "",
-      "url_google_maps": "https://www.google.com/maps/search/?api=1&query=9.93916304800697%2C-84.11831047732150",
+      "url_fuente": "",      "url_google_maps": "https://www.google.com/maps/search/?api=1&query=9.93916304800697%2C-84.11831047732150",
       "imagen_url": "",
       "ambito": "Zona",
       "evidencia": "Alta",
@@ -2453,6 +2451,49 @@
         "en": "Apoyo técnico en aplicaciones, georradar, CORS, transición ESRI-Giswater, formularios, integración de datos, bases SQL/PostgreSQL y alternativas de código abierto.",
         "it": "Apoyo técnico en aplicaciones, georradar, CORS, transición ESRI-Giswater, formularios, integración de datos, bases SQL/PostgreSQL y alternativas de código abierto."
       }
+    },
+    {
+      "id": "SCH-RICURA-2015",
+      "tipo": "Proyecto",
+      "nombre": {
+        "es": "Remodelación industrial – Planta Ricura Avícola (Walmart)",
+        "en": "Industrial refurbishment – Ricura Poultry Plant (Walmart)",
+        "it": "Ristrutturazione industriale – Stabilimento avicolo Ricura (Walmart)"
+      },
+      "organizacion": "SCH Consultoría y Construcción / Walmart",
+      "pais": "Costa Rica",
+      "region": "Alajuela",
+      "ciudad": "Planta Ricura Avícola",
+      "lat": 9.96193965069047,
+      "lon": -84.35572079479125,
+      "anio_inicio": 2015,
+      "anio_fin": 2016,
+      "categoria": "Infraestructura industrial",
+      "estado": "Finalizado",
+      "rol": {
+        "es": "Ingeniero de proyecto – SCH Consultoría y Construcción",
+        "en": "Project engineer – SCH Consulting and Construction",
+        "it": "Ingegnere di progetto – SCH Consulenza e Costruzioni"
+      },
+      "descripcion": {
+        "es": "Proyecto principal durante mi etapa en SCH: remodelación de cuartos de refrigeración, mejoras estructurales y trabajos de mantenimiento industrial en la Planta Ricura Avícola de Walmart.",
+        "en": "Principal project during my time at SCH: refurbishment of refrigerated rooms, structural improvements and industrial maintenance works at Walmart’s Ricura poultry plant.",
+        "it": "Progetto principale durante la mia esperienza in SCH: ristrutturazione delle celle frigorifere, miglioramenti strutturali e interventi di manutenzione industriale nello stabilimento avicolo Ricura di Walmart."
+      },
+      "tecnologias": "Gestión de proyectos, infraestructura industrial, refrigeración, mantenimiento, obras civiles",
+      "indicador": "Proyecto principal en SCH",
+      "precision": "Coordenada verificada por el titular",
+      "visible": "yes",
+      "fuente": "Aporte directo del titular 2026; CV 2025",
+      "url_fuente": "",
+      "url_google_maps": "https://www.google.com/maps/search/?api=1&query=9.96193965069047%2C-84.35572079479125",
+      "imagen_url": "",
+      "ambito": "Puntual",
+      "evidencia": "Declaración del titular",
+      "participacion_detalle": "Gestión de remodelaciones de cuartos de refrigeración, mejoras estructurales, mantenimiento industrial y coordinación de ejecución durante mi etapa en SCH.",
+      "nota_geografica": "Coordenadas suministradas y verificadas por el titular para Planta Ricura Avícola (Walmart).",
+      "fuentes_internas": "CV 2025 y aporte del titular",
+      "validacion": "Coordenada proporcionada y confirmada por el titular, octubre 2026"
     }
   ]
 }
