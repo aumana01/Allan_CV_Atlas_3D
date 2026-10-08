@@ -7,7 +7,7 @@ const str=(s,lang)=>typeof s==='object'&&s ? (s[lang]||s.es||'') : (s||'');
 const normalize=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const State={data:[],filtered:[],lang:'es',selected:null,globe:null,tour:false,timelineYear:null,timelineMode:'upTo',timelineMin:2012,timelineMax:2026,timelineTimer:null};
 const dict=()=>window.ATLAS_I18N[State.lang];const tr=key=>dict()[key]||window.ATLAS_I18N.es[key]||key;
-let toastTimer;
+let toastTimer;let searchTimer=null;let timelinePending=null;let lastAtlasFilterKey='';
 function toast(message){const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);}
 function translateUI(){
  document.documentElement.lang=State.lang;
@@ -68,7 +68,11 @@ function initTimeline(){
  for(let yr=begin;yr<=finish;yr++){if(yr%2===0)candidates.add(yr);}
  $('timelineTicks').innerHTML=[...candidates].sort((a,b)=>a-b).map(year=>`<button type="button" data-time-year="${year}" aria-label="${year}">${year}</button>`).join('');
  $('timelineTicks').addEventListener('click',event=>{const target=event.target.closest('[data-time-year]');if(target)setTimelineYear(Number(target.dataset.timeYear));});
- $('timelineRange').addEventListener('input',event=>setTimelineYear(Number(event.target.value)));
+ $('timelineRange').addEventListener('input',event=>{
+    const year=Number(event.target.value);
+    clearTimeout(timelinePending);
+    timelinePending=setTimeout(()=>setTimelineYear(year),90);
+  });
  $('timelineAll').addEventListener('click',()=>setTimelineYear(null));
  $('timelineMode').addEventListener('change',event=>{State.timelineMode=event.target.value;stopTimeline();filtersChanged();});
  $('timelinePlay').addEventListener('click',()=>{
@@ -96,7 +100,12 @@ function filtersChanged(){
  });
  $('visibleCount').textContent=`${String(State.filtered.length).padStart(2,'0')} / ${State.data.length}`;
  syncTimelineUI();
- renderList();if(State.globe)State.globe.setItems(State.filtered,State.lang,$('toggleLabels').checked);
+ renderList();
+ const key=State.lang+'|'+$('toggleLabels').checked+'|'+State.filtered.map(p=>p.id).join(',');
+ if(State.globe && lastAtlasFilterKey!==key){
+   State.globe.setItems(State.filtered,State.lang,$('toggleLabels').checked);
+   lastAtlasFilterKey=key;
+ }
 }
 function renderList(){
  const list=$('explorerList');if(!State.filtered.length){list.innerHTML=`<p style="padding:17px;color:#a8c2cf;font-size:12px">${esc(tr('noMatches'))}</p>`;return;}
@@ -139,7 +148,11 @@ function selectProject(id, fly=true){
  if(fly&&State.globe)State.globe.flyToProject(p);
  if(window.innerWidth<=800){$('explorerPanel').classList.remove('open');}
  const listButton=$('explorerList').querySelector(`[data-project-id="${CSS.escape(String(id))}"]`);
- if(listButton)listButton.scrollIntoView({block:'nearest',behavior:'smooth'});
+ if(listButton){
+   const list=$('explorerList');
+   const delta=listButton.getBoundingClientRect().top-list.getBoundingClientRect().top;
+   if(delta<0||delta>list.clientHeight-listButton.clientHeight)list.scrollTop+=delta-Math.min(35,list.clientHeight/4);
+ }
 }
 function renderFeatured(){
  const ids=['8','9','10','7','15','16','SCH-RICURA-2015'];
@@ -152,7 +165,8 @@ function renderFeatured(){
 function setLanguage(lang){if(!window.ATLAS_I18N[lang])return;State.lang=lang;translateUI();paintFilters();filtersChanged();renderDetails();renderFeatured();syncTimelineUI();}
 function bind(){
  document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setLanguage(b.dataset.lang)));
- for(const id of ['filterCountry','filterType','filterTech','filterEvidence','search'])$(id).addEventListener(id==='search'?'input':'change',filtersChanged);
+ for(const id of ['filterCountry','filterType','filterTech','filterEvidence'])$(id).addEventListener('change',filtersChanged);
+ $('search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(filtersChanged,160);});
  $('toggleLabels').addEventListener('change',()=>State.globe?.setLabels($('toggleLabels').checked));
  $('clearFilters').addEventListener('click',()=>{for(const id of ['filterCountry','filterType','filterTech','filterEvidence','search'])$(id).value='';setTimelineYear(null);});
  $('explorerList').addEventListener('click',e=>{const b=e.target.closest('[data-project-id]');if(b)selectProject(b.dataset.projectId);});
@@ -185,10 +199,23 @@ async function launch(){
   $('heroProjects').textContent=State.data.filter(isProject).length;
   initTimeline();paintFilters();filtersChanged();renderFeatured();renderDetails();
   if(!window.Cesium)throw new Error(tr('globeUnavailable'));
-  State.globe=new window.AtlasGlobe($('cesiumContainer'),id=>selectProject(id));
-  State.globe.onMove=c=>{$('coordinateReadout').textContent=`LAT ${c.lat}° / LON ${c.lon}° · ALT ${c.alt}`;};
-  State.globe.init();State.globe.setItems(State.filtered,State.lang,$('toggleLabels').checked);
-  $('mapStatus').textContent='● '+tr('ready');
+  let started=false;
+  const startGlobe=()=>{
+    if(started)return;started=true;
+    try{
+      State.globe=new window.AtlasGlobe($('cesiumContainer'),id=>selectProject(id));
+      State.globe.onMove=c=>{$('coordinateReadout').textContent=`LAT ${c.lat}° / LON ${c.lon}° · ALT ${c.alt}`;};
+      State.globe.init();State.globe.setItems(State.filtered,State.lang,$('toggleLabels').checked);
+      lastAtlasFilterKey=State.lang+'|'+$('toggleLabels').checked+'|'+State.filtered.map(p=>p.id).join(',');
+      $('mapStatus').textContent='● '+tr('ready');
+    }catch(error){console.error('Atlas globe startup error',error);$('globeError').hidden=false;$('mapStatus').textContent='● ERROR';}
+  };
+  if('IntersectionObserver' in window){
+    const observer=new IntersectionObserver(entries=>{
+      if(entries.some(e=>e.isIntersecting)){observer.disconnect();startGlobe();}
+    },{rootMargin:'250px 0px'});
+    observer.observe($('atlasShell'));
+  }else startGlobe();
  }catch(error){console.error('Atlas startup error',error);$('globeError').hidden=false;$('mapStatus').textContent='● ERROR';toast(error.message);}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',launch);else launch();

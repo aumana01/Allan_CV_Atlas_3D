@@ -16,26 +16,32 @@
      baseLayer:false, ...ground,
      geocoder:false, homeButton:false, sceneModePicker:false,
      navigationHelpButton:false, timeline:false, animation:false, selectionIndicator:false,
-     infoBox:false, fullscreenButton:false, shouldAnimate:true,
+     infoBox:false, fullscreenButton:false, shouldAnimate:false,
      // IMPORTANTE: nunca usar skyAtmosphere:true. Cesium espera un SkyAtmosphere
      // y el booleano provoca "setDynamicLighting is not a function" al renderizar.
      // La atmósfera se crea automáticamente al omitir esta opción.
-     requestRenderMode:false,
+     requestRenderMode:true, maximumRenderTimeChange:Number.POSITIVE_INFINITY, msaaSamples:1, showRenderLoopErrors:false,
    });
    this.viewer=viewer;
+   viewer.resolutionScale=(window.devicePixelRatio||1)>1.5?0.75:0.9;
+   viewer.scene.requestRenderMode=true;
+   viewer.scene.maximumRenderTimeChange=Number.POSITIVE_INFINITY;
    if(token&&window.ATLAS_CONFIG?.osmBuildings){
      C.createOsmBuildingsAsync().then(tiles=>viewer.scene.primitives.add(tiles)).catch(err=>console.warn('3D buildings unavailable',err));
    }
    viewer.scene.globe.baseColor=C.Color.fromCssColorString('#0d2b39');
-   viewer.scene.globe.showGroundAtmosphere=true;
+   viewer.scene.globe.showGroundAtmosphere=false;
+   viewer.scene.globe.maximumScreenSpaceError=4;
+   viewer.scene.globe.tileCacheSize=100;
    viewer.scene.globe.enableLighting=false;
-   viewer.scene.fog.enabled=true;
+   viewer.scene.fog.enabled=false;
    viewer.scene.globe.depthTestAgainstTerrain=false;
-   viewer.scene.screenSpaceCameraController.minimumZoomDistance=170;
+   viewer.scene.screenSpaceCameraController.minimumZoomDistance=700;
    viewer.scene.screenSpaceCameraController.maximumZoomDistance=45000000;
-   viewer.scene.screenSpaceCameraController.inertiaSpin=0.85;
-   viewer.scene.screenSpaceCameraController.inertiaZoom=0.7;
-   viewer.scene.highDynamicRange=true;
+   viewer.scene.screenSpaceCameraController.inertiaSpin=0.55;
+   viewer.scene.screenSpaceCameraController.inertiaZoom=0.4;
+   viewer.scene.highDynamicRange=false;
+   if(viewer.scene.postProcessStages?.fxaa)viewer.scene.postProcessStages.fxaa.enabled=false;
    this.setLayer('satellite');
    this.dataSource=new C.CustomDataSource('Trayectoria Profesional');
    viewer.dataSources.add(this.dataSource);
@@ -66,19 +72,26 @@
    handler.setInputAction(()=>{this.focusTarget=null},C.ScreenSpaceEventType.LEFT_DOWN);
    this.anchorWheel=e=>{if(this.focusTarget){e.preventDefault();e.stopPropagation();this.zoom(e.deltaY<0?1:-1)}};
    this.el.addEventListener('wheel',this.anchorWheel,{capture:true,passive:false});
+   this._lastReadout=0;
    this.moveListener=()=>{
+     if(!this.onMove)return;
+     const now=performance.now();if(now-this._lastReadout<220)return;this._lastReadout=now;
      const position=viewer.camera.positionCartographic;
-     if(!position)return;
+     if(!position || !Number.isFinite(position.height) || !Number.isFinite(position.latitude) || !Number.isFinite(position.longitude))return;
      const lat=C.Math.toDegrees(position.latitude).toFixed(2);
      const lon=C.Math.toDegrees(position.longitude).toFixed(2);
      const alt=Math.round(position.height/1000).toLocaleString()+' km';
      if(this.onMove)this.onMove({lat,lon,alt});
    };
    viewer.camera.changed.addEventListener(this.moveListener);
-   viewer.camera.percentageChanged=0.03;
-   viewer.scene.renderError.addEventListener((scene,error)=>{ console.warn('Cesium render error',error); });
+   viewer.camera.percentageChanged=0.05;
+   viewer.scene.renderError.addEventListener((scene,error)=>{
+     console.error('Cesium render error',error);
+     document.getElementById('globeError')?.removeAttribute('hidden');
+     const status=document.getElementById('mapStatus');if(status)status.textContent='● VISOR TEMPORALMENTE NO DISPONIBLE';
+   });
    viewer.camera.setView({destination:C.Cartesian3.fromDegrees(-73,11,22000000),orientation:{heading:0,pitch:C.Math.toRadians(-90),roll:0}});
-   const observer=new ResizeObserver(()=>this.resize());observer.observe(this.el);this.observer=observer;
+   let resizeTimer;const observer=new ResizeObserver(()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>this.resize(),120);});observer.observe(this.el);this.observer=observer;
    setTimeout(()=>{this.resize();this.flyToCostaRica(4);},550);
   }
   setLayer(which){
@@ -114,50 +127,97 @@
    if(/digital|scada|python|streamlit|power bi|datos|software|visor|automatiz|gis|tecnolog|instrumentaci|telemetr/.test(blob))return 'digital';
    return 'water';
   }
-  setItems(items, language='es',labels=true){
-   if(!this.viewer || !this.dataSource)return;
-   const C=Ces();this.language=language;this.labels=labels;
-   this.items=items.filter(geoOk);this.entities.clear();this.dataSource.entities.removeAll();
-   for(const p of this.items){
-     const cls=this.classification(p), color=C.Color.fromCssColorString(COLORS[cls]);
-     const title=(p.nombre?.[language] || p.nombre?.es || '').trim();
-     const entity=this.dataSource.entities.add({
-       id:'atlas-'+p.id, position:C.Cartesian3.fromDegrees(Number(p.lon),Number(p.lat),75),
-       point:{pixelSize:cls==='company'?10:13,color,outlineColor:C.Color.fromCssColorString('#041726'),outlineWidth:2,
-         heightReference:C.HeightReference.NONE,scaleByDistance:new C.NearFarScalar(150000,1.2,9500000,.85),
-         disableDepthTestDistance:Number.POSITIVE_INFINITY},
-       label:{text:title.length>31?title.slice(0,30)+'…':title,
-         font:'700 12px DM Sans,sans-serif',fillColor:C.Color.WHITE,
-         style:C.LabelStyle.FILL_AND_OUTLINE,outlineWidth:3,outlineColor:C.Color.fromCssColorString('#03111c'),
-         pixelOffset:new C.Cartesian2(0,-22),verticalOrigin:C.VerticalOrigin.BOTTOM,
-         distanceDisplayCondition:new C.DistanceDisplayCondition(0,1350000),
-         show:labels,disableDepthTestDistance:Number.POSITIVE_INFINITY,
-         scaleByDistance:new C.NearFarScalar(25000,1,1350000,.78)}
-     });
-     entity.atlasId=String(p.id);this.entities.set(String(p.id),entity);
-   }
-   this.viewer.scene.requestRender();
+  setItems(items,language='es',labels=true){
+    if(!this.viewer||!this.dataSource)return;
+    const C=Ces();
+    const languageChanged=this.language!==language;
+    this.language=language;this.labels=labels;
+    this.items=items.filter(geoOk);
+    const ids=new Set(this.items.map(p=>String(p.id)));
+    // Stable entities: filtering never clears/recreates the GPU label collection.
+    for(const p of this.items){
+      const id=String(p.id);
+      let entity=this.entities.get(id);
+      if(!entity){
+        const cls=this.classification(p),color=C.Color.fromCssColorString(COLORS[cls]);
+        const title=(p.nombre?.[language]||p.nombre?.es||'').trim();
+        entity=this.dataSource.entities.add({
+          id:'atlas-'+p.id,
+          position:C.Cartesian3.fromDegrees(Number(p.lon),Number(p.lat),75),
+          point:{pixelSize:cls==='company'?10:13,color,outlineColor:C.Color.fromCssColorString('#041726'),outlineWidth:2,
+            heightReference:C.HeightReference.NONE,disableDepthTestDistance:Number.POSITIVE_INFINITY},
+          label:{text:title.length>31?title.slice(0,30)+'…':title,font:'700 12px sans-serif',fillColor:C.Color.WHITE,
+            style:C.LabelStyle.FILL_AND_OUTLINE,outlineWidth:3,outlineColor:C.Color.fromCssColorString('#03111c'),
+            pixelOffset:new C.Cartesian2(0,-22),verticalOrigin:C.VerticalOrigin.BOTTOM,
+            distanceDisplayCondition:new C.DistanceDisplayCondition(0,1350000),show:labels,
+            disableDepthTestDistance:Number.POSITIVE_INFINITY}
+        });
+        entity.atlasId=id;
+        this.entities.set(id,entity);
+      }
+      if(!entity.show)entity.show=true;
+      if(languageChanged){
+        const text=(p.nombre?.[language]||p.nombre?.es||'').trim();
+        entity.label.text=text.length>31?text.slice(0,30)+'…':text;
+      }
+      if(entity.label.show!==labels)entity.label.show=labels;
+    }
+    for(const [id,entity] of this.entities)if(!ids.has(id)&&entity.show)entity.show=false;
+    this.viewer.scene.requestRender();
   }
   setLabels(v){this.labels=v;if(!this.viewer)return;for(const ent of this.entities.values())ent.label.show=v;this.viewer.scene.requestRender();}
-  flyToProject(p,duration=1.8,heightOverride=null){
+  flyToProject(p,duration=1.5,heightOverride=null){
     if(!this.viewer||!geoOk(p))return;
-    this.cancelTour();const C=Ces();
-    const broad=/regional|multisitio|territorial|aproximad|municipio|localidad/i.test(p.precision||'');
-    const height=heightOverride??(broad?70000:26000);
-    this.focusTarget={lon:Number(p.lon),lat:Number(p.lat),broad};
-    this.viewer.camera.flyToBoundingSphere(new C.BoundingSphere(C.Cartesian3.fromDegrees(Number(p.lon),Number(p.lat),0),120),{offset:new C.HeadingPitchRange(0,-C.Math.PI_OVER_TWO,height),duration});
+    this.cancelTour();
+    const C=Ces(),broad=/regional|multisitio|territorial|aproximad|municipio|localidad/i.test(p.precision||'');
+    const height=Math.min(45000000,Math.max(700,Number(heightOverride)||(broad?70000:26000)));
+    this.focusTarget={lat:Number(p.lat),lon:Number(p.lon),broad,height};
+    this.viewer.camera.cancelFlight();
+    this.viewer.camera.flyTo({destination:C.Cartesian3.fromDegrees(Number(p.lon),Number(p.lat),height),
+      orientation:{heading:0,pitch:-Math.PI/2,roll:0},duration});
+    this.viewer.scene.requestRender();
   }
-  flyToWorld(duration=2){if(!this.viewer)return;this.focusTarget=null;const C=Ces();this.viewer.camera.flyTo({destination:C.Cartesian3.fromDegrees(-75,12,24000000),orientation:{heading:0,pitch:C.Math.toRadians(-90),roll:0},duration});}
-  flyToCostaRica(duration=2){if(!this.viewer)return;this.focusTarget=null;const C=Ces();this.viewer.camera.flyTo({destination:C.Cartesian3.fromDegrees(-84,9.8,1450000),orientation:{heading:0,pitch:C.Math.toRadians(-70),roll:0},duration});}
+  flyToWorld(duration=1.8){
+    if(!this.viewer)return;this.focusTarget=null;
+    const C=Ces();this.viewer.camera.cancelFlight();
+    this.viewer.camera.flyTo({destination:C.Cartesian3.fromDegrees(-75,12,24000000),
+      orientation:{heading:0,pitch:-Math.PI/2,roll:0},duration});
+  }
+  flyToCostaRica(duration=1.8){
+    if(!this.viewer)return;this.focusTarget=null;
+    const C=Ces();this.viewer.camera.cancelFlight();
+    this.viewer.camera.flyTo({destination:C.Cartesian3.fromDegrees(-84,9.8,1450000),
+      orientation:{heading:0,pitch:-Math.PI/2,roll:0},duration});
+  }
   zoom(factor){
-    if(!this.viewer)return;const C=Ces();const camera=this.viewer.camera,current=camera.positionCartographic.height,next=Math.max(220,Math.min(45000000,current*(factor>0?.68:1.42)));
-    if(this.focusTarget){this.viewer.camera.flyToBoundingSphere(new C.BoundingSphere(C.Cartesian3.fromDegrees(this.focusTarget.lon,this.focusTarget.lat,0),120),{offset:new C.HeadingPitchRange(0,-C.Math.PI_OVER_TWO,next),duration:.55});return;}
-    const center=new C.Cartesian2(this.viewer.canvas.clientWidth/2,this.viewer.canvas.clientHeight/2),ray=camera.getPickRay(center),picked=ray&&this.viewer.scene.globe.pick(ray,this.viewer.scene);
-    if(picked){const carto=C.Cartographic.fromCartesian(picked);this.viewer.camera.flyTo({destination:C.Cartesian3.fromDegrees(C.Math.toDegrees(carto.longitude),C.Math.toDegrees(carto.latitude),next),orientation:{heading:camera.heading,pitch:camera.pitch,roll:camera.roll},duration:.55});return;}
-    if(factor>0)camera.zoomIn(Math.max(100,current*.37));else camera.zoomOut(Math.max(100,current*.42));
+    if(!this.viewer)return;
+    const C=Ces(),camera=this.viewer.camera,current=camera.positionCartographic?.height;
+    if(!Number.isFinite(current)){this.flyToCostaRica(.2);return;}
+    const next=Math.min(45000000,Math.max(700,current*(factor>0?.72:1.4)));
+    if(this.focusTarget){
+      const {lon,lat}=this.focusTarget;this.focusTarget.height=next;
+      camera.cancelFlight();
+      camera.flyTo({destination:C.Cartesian3.fromDegrees(lon,lat,next),
+        orientation:{heading:0,pitch:-Math.PI/2,roll:0},duration:.35});
+      return;
+    }
+    const canvas=this.viewer.canvas;
+    const center=new C.Cartesian2(canvas.clientWidth/2,canvas.clientHeight/2);
+    const ray=camera.getPickRay(center),pick=ray&&this.viewer.scene.globe.pick(ray,this.viewer.scene);
+    if(pick){
+      const pos=C.Cartographic.fromCartesian(pick);
+      if(Number.isFinite(pos?.latitude)&&Number.isFinite(pos?.longitude)){
+        camera.cancelFlight();
+        camera.flyTo({destination:C.Cartesian3.fromDegrees(C.Math.toDegrees(pos.longitude),C.Math.toDegrees(pos.latitude),next),
+          orientation:{heading:camera.heading,pitch:-Math.PI/2,roll:0},duration:.35});
+        return;
+      }
+    }
+    if(factor>0)camera.zoomIn(Math.max(50,current*.28));else camera.zoomOut(Math.max(50,current*.4));
+    this.viewer.scene.requestRender();
   }
   north(){if(!this.viewer)return;const C=Ces();this.viewer.camera.flyTo({destination:this.viewer.camera.position,orientation:{heading:0,pitch:C.Math.toRadians(-90),roll:0},duration:.8});}
-  resize(){if(!this.viewer)return;try{this.viewer.resize();this.viewer.scene.requestRender();}catch(e){console.warn('Resize',e);}}
+  resize(){if(!this.viewer||this.el.clientWidth<100||this.el.clientHeight<100)return;try{this.viewer.resize();this.viewer.scene.requestRender();}catch(e){console.warn('Resize',e);}}
   tour(items,onStep,onFinish){
     this.cancelTour();const chosen=items.filter(geoOk).slice(0,7);
     if(!chosen.length)return;
